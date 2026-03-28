@@ -2,7 +2,7 @@
 
 ## Config
 
-- **Timezone**: TIMEZONE_PLACEHOLDER
+- **Timezone**: Asia/Kolkata
 
 ## What This Repo Is
 
