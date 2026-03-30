@@ -33,7 +33,7 @@ Asymmetry is the whole game when the future is uncertain.
 
 <div align="center">
 <a href="https://opennote-cc.vercel.app/">
-<img src="preview.png" alt="OpenNote Web UI" width="400">
+<img src="preview.png" alt="OpenNote Web UI" width="250">
 </a>
 <br>
 <sub>live at <a href="https://opennote-cc.vercel.app/">opennote-cc.vercel.app</a></sub>
