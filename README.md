@@ -8,6 +8,8 @@
 
 [Quick Start](#quick-start) · [How It Works](#how-it-works) · [Examples](#examples) · [Why Plain Files?](#why-plain-files)
 
+[![OpenNote Preview](preview.png)](https://opennote-cc.vercel.app/)
+
 </div>
 
 ---
