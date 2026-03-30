@@ -13,8 +13,9 @@ This is a **Personal Info Bank** — a simple, chronological repository for capt
 The user sends content via Claude Code. Claude's job is to:
 
 1. **Capture** the content into the correct file and directory
-2. **Commit** with a clear message
-3. **Push** to GitHub so everything stays synced
+2. **Update `manifest.json`** — add the new file path to the beginning of the appropriate array
+3. **Commit** with a clear message
+4. **Push** to GitHub so everything stays synced
 
 ## Directory Structure
 
