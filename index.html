@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenNote</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', 'Courier New', monospace;
+      --bg: #fafafa;
+      --fg: #111;
+      --muted: #666;
+      --border: #e0e0e0;
+      --card-bg: #fff;
+      --hover: #f5f5f5;
+      --accent: #111;
+      --tag-bg: #f0f0f0;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      padding: 32px 0 0;
+      margin-bottom: 48px;
+    }
+
+    .site-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-bottom: 4px;
+    }
+
+    .site-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* Navigation / Tabs */
+    nav {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    nav button {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 12px 20px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    nav button:hover {
+      color: var(--fg);
+    }
+
+    nav button.active {
+      color: var(--fg);
+      border-bottom-color: var(--accent);
+    }
+
+    /* Search */
+    .search-bar {
+      margin-bottom: 24px;
+    }
+
+    .search-bar input {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--fg);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-bar input::placeholder {
+      color: #aaa;
+    }
+
+    .search-bar input:focus {
+      border-color: var(--accent);
+    }
+
+    /* Notes list */
+    .notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+    }
+
+    .note-item {
+      background: var(--card-bg);
+      padding: 16px 18px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    .note-item:hover {
+      background: var(--hover);
+    }
+
+    .note-item.active {
+      background: var(--hover);
+      border-left: 3px solid var(--accent);
+      padding-left: 15px;
+    }
+
+    .note-date {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .note-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .note-summary {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Note content view */
+    .note-view {
+      display: none;
+    }
+
+    .note-view.visible {
+      display: block;
+    }
+
+    .back-btn {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 8px 0;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-btn:hover {
+      color: var(--fg);
+    }
+
+    .note-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 32px;
+    }
+
+    .note-content .meta {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .note-content .body {
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .note-content .body h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .note-content .body h2 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+
+    .note-content .body h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .note-content .body p {
+      margin-bottom: 14px;
+    }
+
+    .note-content .body ul, .note-content .body ol {
+      margin-bottom: 14px;
+      padding-left: 20px;
+    }
+
+    .note-content .body li {
+      margin-bottom: 6px;
+    }
+
+    .note-content .body code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: var(--tag-bg);
+      padding: 2px 5px;
+    }
+
+    .note-content .body pre {
+      background: #1a1a1a;
+      color: #e0e0e0;
+      padding: 16px;
+      overflow-x: auto;
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .note-content .body pre code {
+      background: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    .note-content .body blockquote {
+      border-left: 3px solid var(--border);
+      padding-left: 16px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .note-content .body a {
+      color: var(--fg);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .note-content .body strong {
+      font-weight: 600;
+    }
+
+    .note-content .body hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+      font-size: 12px;
+    }
+
+    .pagination button {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--fg);
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+
+    .pagination button:hover:not(:disabled) {
+      background: var(--fg);
+      color: var(--card-bg);
+    }
+
+    .pagination button:disabled {
+      color: var(--muted);
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    .pagination .page-info {
+      color: var(--muted);
+      padding: 0 8px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 64px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .empty-state .empty-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 8px;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 64px;
+      padding: 24px 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--fg);
+    }
+
+    /* Stats bar */
+    .stats {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container { padding: 0 16px; }
+      header { padding: 24px 0 0; margin-bottom: 32px; }
+      .site-title { font-size: 26px; }
+      .note-content { padding: 20px; }
+      nav button { padding: 10px 14px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="site-title">OpenNote</div>
+      <div class="site-subtitle">personal info bank</div>
+    </header>
+
+    <nav id="tabs">
+      <button class="active" data-tab="notes">Notes</button>
+      <button data-tab="explorations">Explorations</button>
+    </nav>
+
+    <div class="search-bar">
+      <input type="text" id="search" placeholder="search notes..." />
+    </div>
+
+    <div id="stats" class="stats"></div>
+
+    <div id="list-view">
+      <div id="notes-list" class="notes-list"></div>
+      <div id="pagination" class="pagination"></div>
+    </div>
+
+    <div id="note-view" class="note-view">
+      <button class="back-btn" id="back-btn">&larr; back</button>
+      <div class="note-content">
+        <div class="meta" id="note-meta"></div>
+        <div class="body" id="note-body"></div>
+      </div>
+    </div>
+
+    <div id="loading" class="loading">loading...</div>
+    <div id="empty" class="empty-state" style="display:none">
+      <div class="empty-label">nothing here yet</div>
+      <div>notes will appear once added</div>
+    </div>
+
+    <footer>
+      <span>built with care</span>
+      <a href="https://github.com/suraj-xd/opennote-cc" target="_blank">GitHub</a>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <script>
+    const PER_PAGE = 10;
+
+    let currentTab = 'notes';
+    let allNotes = [];
+    let filteredNotes = [];
+    let currentPage = 1;
+    let cache = {};
+
+    // DOM
+    const $list = document.getElementById('notes-list');
+    const $pagination = document.getElementById('pagination');
+    const $listView = document.getElementById('list-view');
+    const $noteView = document.getElementById('note-view');
+    const $noteMeta = document.getElementById('note-meta');
+    const $noteBody = document.getElementById('note-body');
+    const $loading = document.getElementById('loading');
+    const $empty = document.getElementById('empty');
+    const $search = document.getElementById('search');
+    const $stats = document.getElementById('stats');
+    const $backBtn = document.getElementById('back-btn');
+
+    // Parse YAML frontmatter
+    function parseFrontmatter(content) {
+      const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+      if (!match) return { meta: {}, body: content };
+      const meta = {};
+      match[1].split('\n').forEach(line => {
+        const idx = line.indexOf(':');
+        if (idx === -1) return;
+        const key = line.slice(0, idx).trim();
+        let val = line.slice(idx + 1).trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'")))
+          val = val.slice(1, -1);
+        meta[key] = val;
+      });
+      return { meta, body: match[2] };
+    }
+
+    // Extract title from filename
+    function parseFilename(name) {
+      const match = name.match(/^(\d{4}-\d{2}-\d{2})_(.+)\.md$/);
+      if (!match) return { date: '', slug: name.replace('.md', '') };
+      return {
+        date: match[1],
+        slug: match[2].replace(/-/g, ' ')
+      };
+    }
+
+    // Format date
+    function formatDate(dateStr) {
+      try {
+        const d = new Date(dateStr + 'T00:00:00');
+        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    }
+
+    // Fetch file list from manifest
+    async function fetchDir(dir) {
+      if (cache[dir]) return cache[dir];
+      if (!cache._manifest) {
+        const res = await fetch('./manifest.json');
+        if (!res.ok) return [];
+        cache._manifest = await res.json();
+      }
+      const paths = cache._manifest[dir] || [];
+      const files = paths
+        .map(p => ({ name: p.split('/').pop(), path: p }))
+        .sort((a, b) => b.name.localeCompare(a.name)); // newest first
+      cache[dir] = files;
+      return files;
+    }
+
+    // Fetch file content (relative path)
+    async function fetchFile(path) {
+      const cacheKey = 'file:' + path;
+      if (cache[cacheKey]) return cache[cacheKey];
+      const res = await fetch('./' + path);
+      if (!res.ok) return null;
+      const text = await res.text();
+      cache[cacheKey] = text;
+      return text;
+    }
+
+    // Fetch summaries (frontmatter only)
+    async function fetchSummaries(files) {
+      return Promise.all(files.map(async f => {
+        const content = await fetchFile(f.path);
+        const { meta } = parseFrontmatter(content || '');
+        const { date, slug } = parseFilename(f.name);
+        return {
+          name: f.name,
+          path: f.path,
+          date: meta.date || date,
+          created: meta.created || '',
+          summary: meta.summary || '',
+          title: slug
+        };
+      }));
+    }
+
+    // Render notes list using safe DOM methods
+    function renderList() {
+      const start = (currentPage - 1) * PER_PAGE;
+      const page = filteredNotes.slice(start, start + PER_PAGE);
+
+      // Clear list
+      $list.replaceChildren();
+      $pagination.replaceChildren();
+
+      if (filteredNotes.length === 0) {
+        $list.style.display = 'none';
+        $empty.style.display = 'block';
+        $stats.textContent = '';
+        return;
+      }
+
+      $empty.style.display = 'none';
+      $list.style.display = 'flex';
+      $stats.textContent = `${filteredNotes.length} note${filteredNotes.length !== 1 ? 's' : ''}`;
+
+      page.forEach(n => {
+        const item = document.createElement('div');
+        item.className = 'note-item';
+
+        const dateEl = document.createElement('div');
+        dateEl.className = 'note-date';
+        dateEl.textContent = formatDate(n.date) + (n.created ? ' / ' + n.created : '');
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'note-title';
+        titleEl.textContent = n.title;
+
+        item.appendChild(dateEl);
+        item.appendChild(titleEl);
+
+        if (n.summary) {
+          const sumEl = document.createElement('div');
+          sumEl.className = 'note-summary';
+          sumEl.textContent = n.summary;
+          item.appendChild(sumEl);
+        }
+
+        item.addEventListener('click', () => openNote(n.path));
+        $list.appendChild(item);
+      });
+
+      renderPagination();
+    }
+
+    // Render pagination using safe DOM methods
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredNotes.length / PER_PAGE);
+      if (totalPages <= 1) return;
+
+      const prevBtn = document.createElement('button');
+      prevBtn.textContent = '\u2190 prev';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderList(); } });
+
+      const info = document.createElement('span');
+      info.className = 'page-info';
+      info.textContent = `${currentPage} / ${totalPages}`;
+
+      const nextBtn = document.createElement('button');
+      nextBtn.textContent = 'next \u2192';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderList(); } });
+
+      $pagination.appendChild(prevBtn);
+      $pagination.appendChild(info);
+      $pagination.appendChild(nextBtn);
+    }
+
+    // Open a note
+    async function openNote(path) {
+      $listView.style.display = 'none';
+      $noteView.classList.add('visible');
+      $noteBody.textContent = 'loading...';
+
+      const content = await fetchFile(path);
+      if (!content) {
+        $noteBody.textContent = 'failed to load note';
+        return;
+      }
+
+      const { meta, body } = parseFrontmatter(content);
+      const { date } = parseFilename(path.split('/').pop());
+
+      $noteMeta.textContent = formatDate(meta.date || date) + (meta.created ? ' / ' + meta.created : '');
+
+      // Render markdown and sanitize with DOMPurify
+      const rawHtml = marked.parse(body);
+      $noteBody.replaceChildren();
+      const sanitized = DOMPurify.sanitize(rawHtml);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = sanitized;
+      $noteBody.appendChild(wrapper);
+
+      window.scrollTo(0, 0);
+    }
+
+    // Close note
+    function closeNote() {
+      $noteView.classList.remove('visible');
+      $listView.style.display = 'block';
+    }
+
+    // Load tab
+    async function loadTab(tab) {
+      currentTab = tab;
+      currentPage = 1;
+      $search.value = '';
+
+      document.querySelectorAll('#tabs button').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === tab);
+      });
+
+      closeNote();
+
+      $loading.style.display = 'block';
+      $list.style.display = 'none';
+      $empty.style.display = 'none';
+      $stats.textContent = '';
+
+      const files = await fetchDir(tab);
+      allNotes = await fetchSummaries(files);
+      filteredNotes = [...allNotes];
+
+      $loading.style.display = 'none';
+      renderList();
+    }
+
+    // Search
+    $search.addEventListener('input', () => {
+      const q = $search.value.toLowerCase().trim();
+      currentPage = 1;
+      if (!q) {
+        filteredNotes = [...allNotes];
+      } else {
+        filteredNotes = allNotes.filter(n =>
+          n.title.toLowerCase().includes(q) ||
+          n.summary.toLowerCase().includes(q) ||
+          n.date.includes(q)
+        );
+      }
+      renderList();
+    });
+
+    // Tab clicks
+    document.querySelectorAll('#tabs button').forEach(btn => {
+      btn.addEventListener('click', () => loadTab(btn.dataset.tab));
+    });
+
+    // Back button
+    $backBtn.addEventListener('click', closeNote);
+
+    // Keyboard: Escape to go back
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && $noteView.classList.contains('visible')) {
+        closeNote();
+      }
+    });
+
+    // Init
+    loadTab('notes');
+  </script>
+</body>
+</html>

@@ -21,6 +21,9 @@ The user sends content via Claude Code. Claude's job is to:
 ```
 opennote/
 ├── CLAUDE.md          # This file — instructions for Claude
+├── index.html         # Static UI — auto-deployed via Vercel
+├── manifest.json      # File index for the UI (must be kept in sync)
+├── vercel.json        # Vercel deployment config
 ├── notes/             # All captured content, one file per topic
 │   ├── 2026-03-06_product-ideas.md
 │   ├── 2026-03-07_meeting-with-alex.md
@@ -31,6 +34,19 @@ opennote/
     ├── 2026-03-15_project-brainstorm.md
     └── ...
 ```
+
+## Manifest
+
+`manifest.json` powers the web UI. It lists all `.md` files in `notes/` and `explorations/`. **Every time a note or exploration is added or removed, update `manifest.json`** to keep the UI in sync. The format is:
+
+```json
+{
+  "notes": ["notes/YYYY-MM-DD_slug.md", ...],
+  "explorations": ["explorations/YYYY-MM-DD_slug.md", ...]
+}
+```
+
+Add new entries to the **beginning** of the array (newest first).
 
 ## How to Record a Note
 
