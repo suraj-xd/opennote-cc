@@ -555,11 +555,24 @@
       };
     }
 
-    // Format date
-    function formatDate(dateStr) {
+    // Format date — relative if recent, absolute if older than 2 days
+    function formatDate(dateStr, timeStr) {
       try {
-        const d = new Date(dateStr + 'T00:00:00');
-        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        const dateTime = timeStr
+          ? new Date(dateStr + 'T' + timeStr + ':00')
+          : new Date(dateStr + 'T00:00:00');
+        const now = new Date();
+        const diffMs = now - dateTime;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHrs = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'just now';
+        if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+        if (diffHrs < 24) return `${diffHrs} hour${diffHrs !== 1 ? 's' : ''} ago`;
+        if (diffDays <= 2) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+
+        return dateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
       } catch {
         return dateStr;
       }
@@ -635,7 +648,7 @@
 
         const dateEl = document.createElement('div');
         dateEl.className = 'note-date';
-        dateEl.textContent = formatDate(n.date) + (n.created ? ' / ' + n.created : '');
+        dateEl.textContent = formatDate(n.date, n.created);
 
         const titleEl = document.createElement('div');
         titleEl.className = 'note-title';
@@ -697,7 +710,7 @@
       const { meta, body } = parseFrontmatter(content);
       const { date } = parseFilename(path.split('/').pop());
 
-      $noteMeta.textContent = formatDate(meta.date || date) + (meta.created ? ' / ' + meta.created : '');
+      $noteMeta.textContent = formatDate(meta.date || date, meta.created);
 
       // Render markdown and sanitize with DOMPurify
       const rawHtml = marked.parse(body);
