@@ -93,6 +93,18 @@
       font-weight: 400;
       letter-spacing: -1px;
       margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .site-icon {
+      height: 36px;
+      width: auto;
+    }
+
+    [data-theme="dark"] .site-icon {
+      filter: invert(1);
     }
 
     .site-subtitle {
@@ -446,7 +458,7 @@
     <header>
       <div class="header-row">
         <div>
-          <div class="site-title">OpenNote</div>
+          <div class="site-title"><img src="./icon.png" alt="" class="site-icon">OpenNote</div>
           <div class="site-subtitle">personal info bank</div>
         </div>
         <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
