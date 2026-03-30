@@ -8,8 +8,6 @@
 
 [Quick Start](#quick-start) · [How It Works](#how-it-works) · [Examples](#examples) · [Why Plain Files?](#why-plain-files)
 
-[![OpenNote Preview](preview.png)](https://opennote-cc.vercel.app/)
-
 </div>
 
 ---
@@ -32,6 +30,14 @@ Asymmetry is the whole game when the future is uncertain.
 </td>
 </tr>
 </table>
+
+<div align="center">
+<a href="https://opennote-cc.vercel.app/">
+<img src="preview.png" alt="OpenNote Web UI" width="400">
+</a>
+<br>
+<sub>live at <a href="https://opennote-cc.vercel.app/">opennote-cc.vercel.app</a></sub>
+</div>
 
 ## Highlights
 
